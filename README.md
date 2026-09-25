@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Halfsec ⚡
 
-## Getting Started
+**Halfsec** is a daily music trivia web game that tests how well players know a featured artist. The catch? You only get to hear exactly **0.5 seconds** (500ms) of a song to guess what it is. 
 
-First, run the development server:
+Every day at 12:00 UTC, a new artist drops. You face 5 consecutive rounds, guessing from a large autocomplete discography pool. At the end, you see your final accuracy, elapsed time, and how you stack up against the global bell curve of players.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 🎧 **Web Audio API:** Slices audio buffers with mathematical precision (no HTML `<audio>` tag lag), ramping down the final 15ms to eliminate speaker pops.
+- 📅 **Daily Global Reset:** A synchronized countdown runs until 12:00 UTC when the next artist is revealed to the world.
+- 🔒 **Ironclad Anti-Cheat:** 
+  - Raw audio MP3s are proxied and stripped of all ID3 metadata via an internal API.
+  - Guess validation happens securely on the server.
+  - Matches are protected by HMAC-signed session tokens and server-side timestamps to prevent fraudulent impossible-time submissions.
+- 📊 **Global Percentile Rankings:** See exactly where your score and reaction time lands on a real-time bell curve.
+- 🟩 **Spoiler-Free Sharing:** 1-click clipboard copying (Wordle-style emoji grids) to flex your elite ear on social media.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** Next.js (App Router, TypeScript)
+- **Styling & Icons:** Tailwind CSS, Lucide React
+- **Audio Engine:** Web Audio API (`AudioContext`)
+- **Fuzzy Search:** `fuse.js`
+- **Database:** Supabase (PostgreSQL)
 
-## Learn More
+## Local Setup
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/halfsec.git
+   cd halfsec
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Set up Environment Variables:**
+   Create a `.env.local` file in the root directory and add your Supabase credentials and a secret key for session tokens:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   GAME_SECRET=a-super-secret-key-that-is-at-least-32-bytes
+   CRON_SECRET=your_cron_secret
+   ```
 
-## Deploy on Vercel
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Test Mode (No DB Required):**
+   If you want to test the UI immediately without setting up a database, you can bypass the daily fetch and dynamically hit the iTunes Search API by adding the `?artist=` query parameter in your browser:
+   `http://localhost:3000/?artist=Drake`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Database Architecture (Supabase)
+
+To run the game in production, you will need to execute the schema to create `daily_challenges` and `daily_submissions` (or the V2 `scheduled_artists` schema for unreleased tracks) in your Supabase SQL Editor. See the internal design docs for the table setup!
+
+---
+
+*Inspired by Songless. Built with Next.js.*
